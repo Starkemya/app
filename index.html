@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Starkemya.app – El arte de dar y recibir.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at top, #1b1b2f 0%, #050509 60%, #000 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      background: radial-gradient(circle at top, #181824 0%, #050509 60%);
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+      padding: 26px 22px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at top, rgba(255, 105, 180, 0.13), transparent 60%);
+      pointer-events: none;
+    }
+
+    .app-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+
+    .top-logo {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 10px;
+      background: radial-gradient(circle at 30% 0%, #ff9ad9 0%, #ff5bb0 40%, #ff2c7b 100%);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 35px rgba(255, 72, 140, 0.6);
+    }
+
+    .top-logo img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      color: #ff7fd1;
+      margin-bottom: 4px;
+    }
+
+    .brand-subtitle {
+      font-size: 1rem;
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 0.98rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+      font-size: 0.86rem;
+      color: #d7d7e6;
+      margin-bottom: 14px;
+    }
+
+    /* Botón principal arriba del menú */
+
+    .primary-btn {
+      margin: 4px auto 14px;
+      padding: 13px 22px;
+      border-radius: 999px;
+      border: none;
+      background: radial-gradient(circle at top left, #ff7ac4, #ff2b7a);
+      color: #ffffff;
+      font-size: 0.98rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow:
+        0 12px 35px rgba(255, 72, 140, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.08);
+      transition: all 0.18s ease;
+      display: inline-block;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow:
+        0 16px 45px rgba(255, 72, 140, 1),
+        0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.65;
+      cursor: default;
+      transform: none;
+      box-shadow:
+        0 12px 35px rgba(255, 72, 140, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    /* Tabs 2×2 */
+
+    .tabs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      padding: 10px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: radial-gradient(circle at top, #181827, #050509);
+      color: #f5f5ff;
+      font-size: 0.86rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    .tab-btn.active {
+      background: radial-gradient(circle at top left, #ff7ac4, #ff2b7a);
+      color: #ffffff;
+      box-shadow: 0 8px 28px rgba(255, 72, 140, 0.7);
+      border-color: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Card / Dice area */
+
+    .card-wrapper {
+      margin: 0 auto 14px;
+      width: min(280px, 84vw);
+      height: calc(min(280px, 84vw) * 1.3);
+      border-radius: 28px;
+      background: radial-gradient(circle at top, #1a1a29, #050509);
+      box-shadow:
+        0 25px 55px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .result-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
+      background: radial-gradient(circle at top, #10101a, #050508 65%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 12px 12px 16px;
+      position: relative;
+      transition: transform 0.16s ease;
+    }
+
+    .result-inner.flash {
+      transform: scale(1.02);
+    }
+
+    /* Remates del Dado GEN */
+
+    .gen-remate {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .gen-remate-main {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .gen-remate-sub {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .result-image {
+      width: 88%;
+      height: auto;
+      max-height: 70%;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .result-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-top: 2px;
+    }
+
+    .result-subtitle {
+      margin-top: 4px;
+      font-size: 0.84rem;
+      color: #d4d4e2;
+      text-align: center;
+    }
+
+    .helper-text {
+      margin-top: 10px;
+      font-size: 0.84rem;
+      color: #e0e0f2;
+    }
+
+    .footnote {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #a3a3c2;
+    }
+
+    .url {
+      margin-top: 4px;
+      font-size: 0.76rem;
+      color: #7f7ff0;
+    }
+
+    .url span {
+      opacity: 0.9;
+    }
+
+    @media (min-width: 768px) {
+      .app {
+        max-width: 460px;
+        padding: 30px 26px 24px;
+      }
+
+      .tabs-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .tab-btn {
+        min-width: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="app-inner">
+    <div class="top-logo">
+      <img src="logo-cubo.png" alt="Logo Starkemya" />
+    </div>
+    <div class="brand-title">STARkEMYA.APP</div>
+    <div class="brand-subtitle">El arte de dar y recibir.</div>
+
+    <div id="sectionTitle" class="section-title">DADO GEN</div>
+    <div id="sectionSubtitle" class="section-subtitle">
+      Tocá para descubrir tu combinación ✨
+    </div>
+
+    <button id="actionButton" class="primary-btn">TIRAR DADO</button>
+
+    <div class="tabs-grid">
+      <button class="tab-btn active" data-mode="gen">Dado GEN</button>
+      <button class="tab-btn" data-mode="tantra">Dado TANTRA</button>
+      <button class="tab-btn" data-mode="interacciones">Cartas Interacciones</button>
+      <button class="tab-btn" data-mode="spots">Cartas Spots</button>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="result-inner" id="resultInner">
+        <div id="genRemate" class="gen-remate" style="display:none;">
+          <div class="gen-remate-main"></div>
+          <div class="gen-remate-sub"></div>
+        </div>
+        <img id="resultImage" class="result-image" src="logo-cubo.png" alt="Resultado" />
+        <div id="resultTitle" class="result-title">Dado GEN</div>
+        <div id="resultSubtitle" class="result-subtitle">
+          Tocá “Tirar dado” para ver la combinación de este encuentro.
+        </div>
+      </div>
+    </div>
+
+    <div id="helperText" class="helper-text">
+      Dejá que el azar guíe el encuentro.
+    </div>
+    <div class="footnote">
+      Respeten siempre los tiempos y el sí de cada unx.
+    </div>
+    <div class="url">
+      <span>starkemyapp.netlify.app</span>
+    </div>
+  </div>
+</div>
+
+<audio id="rollSound" src="sonido.mp3" preload="auto"></audio>
+
+<script>
+  // ---------- DATA ----------
+
+  // Dado GEN – remates y combinaciones
+  const genFaces = [
+    {
+      img: "marte-marte.png",
+      combo: "Marte – Marte",
+      main: "Dás lo que vos querés!",
+      sub: "Acá solo das."
+    },
+    {
+      img: "marte-venus.png",
+      combo: "Marte – Venus",
+      main: "Dás lo que el otrx quiere.",
+      sub: "Acá te puede pedir."
+    },
+    {
+      img: "venus-marte.png",
+      combo: "Venus – Marte",
+      main: "Recibís lo que vos querés.",
+      sub: "Acá podés pedir."
+    },
+    {
+      img: "venus-venus.png",
+      combo: "Venus – Venus",
+      main: "Recibís lo que el otrx quiere.",
+      sub: "Acá solo recibís."
+    },
+    {
+      img: "marte.png",
+      combo: "Marte",
+      main: "Elegís una de las 4 combinaciones.",
+      sub: "Dar, recibir, pedir o que te pidan."
+    },
+    {
+      img: "venus.png",
+      combo: "Venus",
+      main: "Tu complemento elige una de las 4 combinaciones.",
+      sub: "Dar, recibir, pedir o que le pidan."
+    }
+  ];
+
+  // Dado TANTRA
+  const tantraFaces = [
+    {
+      img: "tm.png",
+      title: "Marte elige cuántas tiradas del Dado GEN tendrá el encuentro.",
+      subtitle: ""
+    },
+    {
+      img: "tv.png",
+      title: "Venus: tu complemento elige cuántas tiradas del Dado GEN habrá.",
+      subtitle: ""
+    },
+    {
+      img: "t1.png",
+      title: "Tiran una vez el Dado GEN.",
+      subtitle: ""
+    },
+    {
+      img: "t2.png",
+      title: "Tiran dos veces el Dado GEN.",
+      subtitle: ""
+    },
+    {
+      img: "t3.png",
+      title: "Tiran tres veces el Dado GEN.",
+      subtitle: ""
+    },
+    {
+      img: "t4.png",
+      title: "Tiran cuatro veces el Dado GEN… si se animan.",
+      subtitle: ""
+    }
+  ];
+
+  // Cartas Interacciones
+  const interactionCards = [
+    {
+      img: "interaccion.png",
+      title: "Cartas Interacciones",
+      remate: "Tocá para elegir una interacción para el encuentro."
+    },
+    {
+      img: "imasturbaciongenital.png",
+      title: "Masturbación genital",
+      remate: "Táctil, valen juguetes y aceites."
+    },
+    {
+      img: "ioralgenital.png",
+      title: "Exploración oral genital",
+      remate: "Valen lengua, besos y mordiditas."
+    },
+    {
+      img: "masakes.png",
+      title: "Masajes",
+      remate: "Dar bienestar, hacer mimos."
+    },
+    {
+      img: "oralcorporal.png",
+      title: "Exploración oral corporal",
+      remate: "Lamer, morder suave, chupar."
+    },
+    {
+      img: "penetracion%20anal.png",
+      title: "Penetración – exploración anal",
+      remate: "Usá aceite y masajes para dilatar."
+    },
+    {
+      img: "exploracionanala.png",
+      title: "Exploración anal",
+      remate: "De a poco, suave, escuchando el cuerpo."
+    },
+    {
+      img: "ifree.png",
+      title: "Free",
+      remate: "Inventen su propia interacción para este encuentro."
+    }
+  ];
+
+  // Cartas Spots
+  const spotCards = [
+    {
+      img: "spots.png",
+      title: "Cartas Spots",
+      remate: "Tocá para elegir dónde se da el encuentro."
+    },
+    {
+      img: "sexterior.png",
+      title: "Exterior",
+      remate: "Busquen un lugar al aire libre que los inspire."
+    },
+    {
+      img: "sillon.png",
+      title: "Sillón / living",
+      remate: "Elijan su rincón favorito del living."
+    },
+    {
+      img: "baño.png",
+      title: "Baño",
+      remate: "Jueguen con el agua, la luz y el vapor."
+    },
+    {
+      img: "cama.png",
+      title: "Cama",
+      remate: "Vuelvan a la cama como si fuera la primera vez."
+    },
+    {
+      img: "cocina.png",
+      title: "Cocina",
+      remate: "Transformen la cocina en escenario del encuentro."
+    },
+    {
+      img: "sfree.png",
+      title: "Free spot",
+      remate: "Donde quieran, cuando quieran. Elijan su propio lugar."
+    }
+  ];
+
+  // ---------- STATE & DOM ----------
+
+  let currentMode = "gen";
+  let isSpinning = false;
+
+  const sectionTitle = document.getElementById("sectionTitle");
+  const sectionSubtitle = document.getElementById("sectionSubtitle");
+  const resultInner = document.getElementById("resultInner");
+  const resultImage = document.getElementById("resultImage");
+  const resultTitle = document.getElementById("resultTitle");
+  const resultSubtitle = document.getElementById("resultSubtitle");
+  const genRemate = document.getElementById("genRemate");
+  const genRemateMain = genRemate.querySelector(".gen-remate-main");
+  const genRemateSub = genRemate.querySelector(".gen-remate-sub");
+  const actionButton = document.getElementById("actionButton");
+  const helperText = document.getElementById("helperText");
+  const rollSound = document.getElementById("rollSound");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+
+  // ---------- HELPERS ----------
+
+  function flashCard() {
+    resultInner.classList.add("flash");
+    setTimeout(() => resultInner.classList.remove("flash"), 140);
+  }
+
+  function playRollSound() {
+    try {
+      rollSound.currentTime = 0;
+      rollSound.play().catch(() => {});
+    } catch (e) {}
+  }
+
+  function resetForMode(mode) {
+    if (mode === "gen") {
+      genRemate.style.display = "none";
+      resultImage.src = "logo-cubo.png";
+      resultTitle.textContent = "Dado GEN";
+      resultSubtitle.textContent =
+        "Tocá “Tirar dado” para ver la combinación de este encuentro.";
+      helperText.textContent = "Dejá que el azar guíe el encuentro.";
+    } else if (mode === "tantra") {
+      genRemate.style.display = "none";
+      resultImage.src = "logo-cubo.png";
+      resultTitle.textContent = "Dado TANTRA";
+      resultSubtitle.textContent =
+        "Tocá “Tirar dado” para definir cuántas tiradas del GEN habrá.";
+      helperText.textContent = "Dejá que el Dado TANTRA marque el ritmo.";
+    } else if (mode === "interacciones") {
+      const card = interactionCards[0];
+      genRemate.style.display = "none";
+      resultImage.src = card.img;
+      resultTitle.textContent = card.title;
+      resultSubtitle.textContent = card.remate;
+      helperText.textContent =
+        "Dejá que una carta sugiera cómo compartir el momento.";
+    } else if (mode === "spots") {
+      const card = spotCards[0];
+      genRemate.style.display = "none";
+      resultImage.src = card.img;
+      resultTitle.textContent = card.title;
+      resultSubtitle.textContent = card.remate;
+      helperText.textContent = "Dejá que el azar elija dónde se da la magia.";
+    }
+  }
+
+  function setMode(mode) {
+    if (isSpinning) return;
+
+    currentMode = mode;
+    tabButtons.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+
+    if (mode === "gen") {
+      sectionTitle.textContent = "DADO GEN";
+      sectionSubtitle.textContent = "Tocá para descubrir tu combinación ✨";
+      actionButton.textContent = "TIRAR DADO";
+    } else if (mode === "tantra") {
+      sectionTitle.textContent = "DADO TANTRA";
+      sectionSubtitle.textContent =
+        "Tocá para definir cuántas tiradas del Dado GEN habrá.";
+      actionButton.textContent = "TIRAR DADO";
+    } else if (mode === "interacciones") {
+      sectionTitle.textContent = "CARTAS INTERACCIONES";
+      sectionSubtitle.textContent =
+        "Tocá para elegir una interacción para el encuentro.";
+      actionButton.textContent = "SACAR CARTA";
+    } else if (mode === "spots") {
+      sectionTitle.textContent = "CARTAS SPOTS";
+      sectionSubtitle.textContent =
+        "Tocá para elegir un lugar para el encuentro.";
+      actionButton.textContent = "SACAR CARTA";
+    }
+
+    resetForMode(mode);
+  }
+
+  function showGenFace(face) {
+    genRemate.style.display = "block";
+    genRemateMain.textContent = face.main;
+    genRemateSub.textContent = face.sub;
+    resultImage.src = face.img;
+    resultTitle.textContent = face.combo;
+    resultSubtitle.textContent = "";
+  }
+
+  function showTantraFace(face) {
+    genRemate.style.display = "none";
+    resultImage.src = face.img;
+    resultTitle.textContent = face.title;
+    resultSubtitle.textContent = face.subtitle || "";
+  }
+
+  function showCard(card) {
+    genRemate.style.display = "none";
+    resultImage.src = card.img;
+    resultTitle.textContent = card.title;
+    resultSubtitle.textContent = card.remate;
+  }
+
+  // Animación tipo “ruleta”
+  function spinAndStop(pool, renderFn, finalFn) {
+    if (isSpinning) return;
+    isSpinning = true;
+    actionButton.disabled = true;
+
+    playRollSound();
+    flashCard();
+
+    const duration =
+      rollSound.duration && rollSound.duration > 0
+        ? rollSound.duration * 1000
+        : 2200;
+    const intervalTime = 90;
+
+    let intervalId = setInterval(() => {
+      const tempFace = pool[Math.floor(Math.random() * pool.length)];
+      renderFn(tempFace);
+    }, intervalTime);
+
+    setTimeout(() => {
+      clearInterval(intervalId);
+      const finalFace = pool[Math.floor(Math.random() * pool.length)];
+      finalFn(finalFace);
+      flashCard();
+      isSpinning = false;
+      actionButton.disabled = false;
+    }, duration);
+  }
+
+  // ---------- EVENTOS ----------
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      setMode(btn.dataset.mode);
+    });
+  });
+
+  actionButton.addEventListener("click", () => {
+    if (isSpinning) return;
+
+    if (currentMode === "gen") {
+      spinAndStop(genFaces, showGenFace, showGenFace);
+    } else if (currentMode === "tantra") {
+      spinAndStop(tantraFaces, showTantraFace, showTantraFace);
+    } else if (currentMode === "interacciones") {
+      const pool = interactionCards.slice(1);
+      spinAndStop(pool, showCard, showCard);
+    } else if (currentMode === "spots") {
+      const pool = spotCards.slice(1);
+      spinAndStop(pool, showCard, showCard);
+    }
+  });
+
+  // ---------- INIT ----------
+  setMode("gen");
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Registra el service worker en la ruta correcta
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registrado con éxito:', registration);
+          })
+          .catch(error => {
+            console.log('Fallo el registro del Service Worker:', error);
+          });
+      });
+    }
+</script>
+
+</body>
+</html>

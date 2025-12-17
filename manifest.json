@@ -1,0 +1,25 @@
+{
+  "name": "Starkemya",
+  "short_name": "Starkemya",
+  "id": "com.starkemya.app",
+  "description": "El arte de dar y recibir. Un juego para conectar, jugando.",
+  "lang": "es-AR",
+  "dir": "ltr",
+
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+
+  "background_color": "#050509",
+  "theme_color": "#181824",
+
+  "icons": [
+    {
+      "src": "logo-cubo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
