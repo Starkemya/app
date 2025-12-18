@@ -1,15 +1,15 @@
-// Define el nombre del cache. Incrementa la versión para forzar la actualización (e.g., v2).
-const CACHE_NAME = 'starkemya-cache-v2'; 
+const CACHE_VERSION = 'v3';
+const CACHE_NAME = `starkemya-cache-${CACHE_VERSION}`;
 
 // Lista de archivos esenciales que deben guardarse en el dispositivo.
 const urlsToCache = [
-  '/', // La página principal (index.html)
-  '/index.html', 
-  '/manifest.json', 
-  '/logo-cubo.png', 
-  '/sonido.mp3', // <-- Archivo de audio
-  
-  // <-- Imágenes de Dado GEN -->
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/logo-cubo.png',
+  '/sonido.mp3',
+
+  // Dado GEN
   '/marte-marte.png',
   '/marte-venus.png',
   '/venus-marte.png',
@@ -17,7 +17,7 @@ const urlsToCache = [
   '/marte.png',
   '/venus.png',
 
-  // <-- Imágenes de Dado TANTRA -->
+  // Dado TANTRA
   '/tm.png',
   '/tv.png',
   '/t1.png',
@@ -25,7 +25,7 @@ const urlsToCache = [
   '/t3.png',
   '/t4.png',
 
-  // <-- Imágenes de Cartas Interacciones -->
+  // Cartas Interacciones
   '/interaccion.png',
   '/imasturbaciongenital.png',
   '/ioralgenital.png',
@@ -34,12 +34,12 @@ const urlsToCache = [
   '/penetracion%20anal.png',
   '/exploracionanala.png',
   '/ifree.png',
-  
-  // <-- Imágenes de Cartas Spots -->
+
+  // Cartas Spots
   '/spots.png',
   '/sexterior.png',
   '/sillon.png',
-  '/baño.png',
+  '/bano.png',
   '/cama.png',
   '/cocina.png',
   '/sfree.png'
@@ -49,42 +49,46 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache abierto y precargado');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .catch(error => {
         console.error('Fallo al precargar el cache:', error);
       })
   );
+
+  self.skipWaiting();
 });
 
 // Evento: Activación (Limpia los caches viejos para ahorrar espacio)
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('Borrando cache viejo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches
+      .keys()
+      .then(cacheNames =>
+        Promise.all(
+          cacheNames
+            .filter(name => name.startsWith('starkemya-cache-') && name !== CACHE_NAME)
+            .map(cacheName => caches.delete(cacheName))
+        )
+      )
+      .then(() => self.clients.claim())
   );
 });
 
 // Evento: Recuperar archivos (Estrategia: Cache First)
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(response => {
+      if (response) return response;
+
+      return fetch(event.request)
+        .then(networkResponse => {
+          const clonedResponse = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clonedResponse));
+          return networkResponse;
+        })
+        .catch(() => caches.match('/'));
+    })
   );
 });

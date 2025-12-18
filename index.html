@@ -235,6 +235,51 @@
       margin-bottom: 8px;
     }
 
+    .slot-extras {
+      width: 100%;
+      display: none;
+      gap: 10px;
+      margin-bottom: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .slot-extra-card {
+      flex: 1;
+      background: radial-gradient(circle at top, #141420, #050509);
+      border-radius: 14px;
+      padding: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 110px;
+      transition: transform 0.12s ease;
+    }
+
+    .slot-extra-card img {
+      width: 88%;
+      max-height: 76px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
+    }
+
+    .slot-extra-title {
+      font-size: 0.78rem;
+      text-align: center;
+      color: #e7e7ff;
+      line-height: 1.2;
+    }
+
+    .slot-extra-note {
+      font-size: 0.7rem;
+      color: #c9c9e6;
+      opacity: 0.9;
+    }
+
     .result-title {
       font-size: 0.96rem;
       font-weight: 600;
@@ -323,6 +368,18 @@
         <div id="resultTitle" class="result-title">Dado GEN</div>
         <div id="resultSubtitle" class="result-subtitle">
           Tocá “Tirar dado” para ver la combinación de este encuentro.
+        </div>
+        <div id="slotExtras" class="slot-extras">
+          <div class="slot-extra-card">
+            <img id="interactionImage" src="interaccion.png" alt="Interacción al azar" loading="lazy" decoding="async" />
+            <div id="interactionTitle" class="slot-extra-title">Interacciones</div>
+            <div class="slot-extra-note">Carta</div>
+          </div>
+          <div class="slot-extra-card">
+            <img id="spotImage" src="spots.png" alt="Spot al azar" loading="lazy" decoding="async" />
+            <div id="spotTitle" class="slot-extra-title">Spots</div>
+            <div class="slot-extra-note">Carta</div>
+          </div>
         </div>
       </div>
     </div>
@@ -480,7 +537,7 @@
       remate: "Elijan su rincón favorito del living."
     },
     {
-      img: "baño.png",
+      img: "bano.png",
       title: "Baño",
       remate: "Jueguen con el agua, la luz y el vapor."
     },
@@ -512,6 +569,11 @@
   const resultImage = document.getElementById("resultImage");
   const resultTitle = document.getElementById("resultTitle");
   const resultSubtitle = document.getElementById("resultSubtitle");
+  const slotExtras = document.getElementById("slotExtras");
+  const interactionImage = document.getElementById("interactionImage");
+  const interactionTitle = document.getElementById("interactionTitle");
+  const spotImage = document.getElementById("spotImage");
+  const spotTitle = document.getElementById("spotTitle");
   const genRemate = document.getElementById("genRemate");
   const genRemateMain = genRemate.querySelector(".gen-remate-main");
   const genRemateSub = genRemate.querySelector(".gen-remate-sub");
@@ -534,7 +596,38 @@
     } catch (e) {}
   }
 
+  const interactionPool = interactionCards.slice(1);
+  const spotPool = spotCards.slice(1);
+
+  function toggleSlotExtras(show) {
+    slotExtras.style.display = show ? "grid" : "none";
+  }
+
+  function renderExtras(interaction, spot) {
+    if (!interaction || !spot) {
+      toggleSlotExtras(false);
+      return;
+    }
+
+    toggleSlotExtras(true);
+    interactionImage.src = interaction.img;
+    interactionTitle.textContent = interaction.title;
+    spotImage.src = spot.img;
+    spotTitle.textContent = spot.title;
+  }
+
+  function preloadAssets(paths) {
+    paths.forEach(src => {
+      const img = new Image();
+      img.decoding = "async";
+      img.loading = "eager";
+      img.src = src;
+    });
+  }
+
   function resetForMode(mode) {
+    toggleSlotExtras(false);
+
     if (mode === "gen") {
       genRemate.style.display = "none";
       resultImage.src = "logo-cubo.png";
@@ -599,13 +692,18 @@
     resetForMode(mode);
   }
 
-  function showGenFace(face) {
+  function showGenFace(face, extras) {
     genRemate.style.display = "block";
     genRemateMain.textContent = face.main;
     genRemateSub.textContent = face.sub;
     resultImage.src = face.img;
     resultTitle.textContent = face.combo;
     resultSubtitle.textContent = "";
+    if (extras) {
+      renderExtras(extras.interaction, extras.spot);
+    } else {
+      toggleSlotExtras(false);
+    }
   }
 
   function showTantraFace(face) {
@@ -617,16 +715,55 @@
 
   function showCard(card) {
     genRemate.style.display = "none";
+    toggleSlotExtras(false);
     resultImage.src = card.img;
     resultTitle.textContent = card.title;
     resultSubtitle.textContent = card.remate;
   }
 
-  // Animación tipo “ruleta”
-  function spinAndStop(pool, renderFn, finalFn) {
+  function pickRandom(pool) {
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // Animación tipo “ruleta” sincronizada con el audio
+  function spinAndStop(pool, renderFn, finalFn, options = {}) {
     if (isSpinning) return;
     isSpinning = true;
     actionButton.disabled = true;
+
+    const intervalTime = options.intervalTime || 90;
+    const getFrameExtras = options.getFrameExtras;
+    const getFinalExtras = options.getFinalExtras;
+    const finalFace = pickRandom(pool);
+    const finalExtras = getFinalExtras ? getFinalExtras() : null;
+    let lastFrame = 0;
+    let rafId = null;
+    let fallbackTimeout = null;
+
+    const stopAnimation = () => {
+      if (!isSpinning) return;
+      if (rafId) cancelAnimationFrame(rafId);
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+      rollSound.removeEventListener("ended", stopAnimation);
+
+      finalFn(finalFace, finalExtras);
+      flashCard();
+      isSpinning = false;
+      actionButton.disabled = false;
+    };
+
+    const runFrame = timestamp => {
+      if (!lastFrame || timestamp - lastFrame >= intervalTime) {
+        const tempFace = pickRandom(pool);
+        const frameExtras = getFrameExtras ? getFrameExtras() : null;
+        renderFn(tempFace, frameExtras);
+        lastFrame = timestamp;
+      }
+
+      if (isSpinning) {
+        rafId = requestAnimationFrame(runFrame);
+      }
+    };
 
     playRollSound();
     flashCard();
@@ -635,21 +772,11 @@
       rollSound.duration && rollSound.duration > 0
         ? rollSound.duration * 1000
         : 2200;
-    const intervalTime = 90;
 
-    let intervalId = setInterval(() => {
-      const tempFace = pool[Math.floor(Math.random() * pool.length)];
-      renderFn(tempFace);
-    }, intervalTime);
+    fallbackTimeout = setTimeout(stopAnimation, duration + 80);
+    rollSound.addEventListener("ended", stopAnimation);
 
-    setTimeout(() => {
-      clearInterval(intervalId);
-      const finalFace = pool[Math.floor(Math.random() * pool.length)];
-      finalFn(finalFace);
-      flashCard();
-      isSpinning = false;
-      actionButton.disabled = false;
-    }, duration);
+    rafId = requestAnimationFrame(runFrame);
   }
 
   // ---------- EVENTOS ----------
@@ -664,19 +791,41 @@
     if (isSpinning) return;
 
     if (currentMode === "gen") {
-      spinAndStop(genFaces, showGenFace, showGenFace);
+      const randomSlotExtras = () => ({
+        interaction: pickRandom(interactionPool),
+        spot: pickRandom(spotPool)
+      });
+
+      spinAndStop(genFaces, showGenFace, showGenFace, {
+        intervalTime: 80,
+        getFrameExtras: randomSlotExtras,
+        getFinalExtras: randomSlotExtras
+      });
     } else if (currentMode === "tantra") {
-      spinAndStop(tantraFaces, showTantraFace, showTantraFace);
+      spinAndStop(tantraFaces, showTantraFace, showTantraFace, {
+        intervalTime: 80
+      });
     } else if (currentMode === "interacciones") {
       const pool = interactionCards.slice(1);
-      spinAndStop(pool, showCard, showCard);
+      spinAndStop(pool, showCard, showCard, { intervalTime: 80 });
     } else if (currentMode === "spots") {
       const pool = spotCards.slice(1);
-      spinAndStop(pool, showCard, showCard);
+      spinAndStop(pool, showCard, showCard, { intervalTime: 80 });
     }
   });
 
   // ---------- INIT ----------
+  const assetsToPreload = Array.from(
+    new Set([
+      ...genFaces.map(item => item.img),
+      ...tantraFaces.map(item => item.img),
+      ...interactionCards.map(item => item.img),
+      ...spotCards.map(item => item.img),
+      "logo-cubo.png"
+    ])
+  );
+
+  preloadAssets(assetsToPreload);
   setMode("gen");
 </script>
 
